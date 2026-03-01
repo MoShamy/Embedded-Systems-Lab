@@ -12,9 +12,9 @@ int main(void)
 		uint8_t blue = 0x04; //init blue
 		uint8_t red = 0x02; //init red
 		uint8_t green = 0x08; //
+		int running = 1;
 	
 		uint8_t col = blue;
-	bool on = 0;
 	
 // enable clock to GPIOF at clock gating control register
 SYSCTL->RCGCGPIO |= 0x20;
@@ -43,21 +43,32 @@ SYSCTL->RCGCGPIO |= 0x20;
 	GPIOF->DATA = blue;
 
 while(1)
-{
-	if((GPIOF->DATA & 0x10) ==0){
-	if (col == blue){
-		col = green;
-	}else if(col == green){
-		col = red;
-	}else if (col ==red){
-		col = blue;
+{ 
+	if((GPIOF->DATA & 0x01) ==0){ //if sw2 pressed
+		running = !running;
 	}
-}
+
+	//switching colors
+	if(running){
+		if (col == 0x00){
+			col = blue;}
+		if((GPIOF->DATA & 0x10) ==0){ //if sw1 pressed
+			if (col == blue){
+				col = green;
+			}else if(col == green){
+				col = red;
+			}else if (col ==red){
+				col = blue;
+			} else if (col == 0x00){
+			col = blue;}
+		}
+}else{
+			col = 0x00;}
 	
-GPIOF->DATA = col; // turn on blue LED
-delayMs(500);
-GPIOF->DATA = 0; // turn off blue LED
-delayMs(500);
+	GPIOF->DATA = col; // turn on blue LED
+	delayMs(500);
+	GPIOF->DATA = 0; // turn off blue LED
+	delayMs(500);
 	}
 }
 // delay in milliseconds (16 MHz CPU clock)
